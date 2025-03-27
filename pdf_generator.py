@@ -1,42 +1,36 @@
-from fpdf import FPDF
-import os
-
-class PDF(FPDF):
-    def header(self):
-        """Add a header to the PDF."""
-        self.set_font("Arial", style="B", size=16)
-        self.cell(200, 10, "AI-Generated Travel Itinerary", ln=True, align="C")
-        self.ln(10)
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 
 def generate_pdf(destination, start_date, duration, budget, preferences, itinerary):
-    """Generate a PDF file with the travel itinerary and handle Unicode encoding issues."""
-
-    pdf = PDF()
-    pdf.set_auto_page_break(auto=True, margin=15)
-    pdf.add_page()
-
-    # Set font to DejaVu (supports Unicode) or Arial if unavailable
-    try:
-        pdf.add_font("DejaVu", "", "DejaVuSansCondensed.ttf", uni=True)
-        pdf.set_font("DejaVu", size=12)
-    except:
-        pdf.set_font("Arial", size=12)
-
-    # Title
-    pdf.cell(200, 10, f"📍 Destination: {destination}", ln=True)
-    pdf.cell(200, 10, f"📅 Start Date: {start_date}", ln=True)
-    pdf.cell(200, 10, f"⏳ Duration: {duration} days", ln=True)
-    pdf.cell(200, 10, f"💰 Budget: {budget}", ln=True)
-    pdf.cell(200, 10, f"🎭 Preferences: {preferences}", ln=True)
-    pdf.ln(10)
-
-    # Handle special characters in the itinerary
-    safe_text = itinerary.encode("latin-1", "replace").decode("latin-1")
-
-    # Itinerary Content
-    pdf.multi_cell(0, 10, safe_text)
-
-    # Save PDF
+    """Generate a PDF file with travel itinerary using ReportLab (supports Unicode)."""
+    
     filename = "itinerary.pdf"
-    pdf.output(filename, "F")
+    c = canvas.Canvas(filename, pagesize=letter)
+    
+    # Set title
+    c.setFont("Helvetica-Bold", 16)
+    c.drawString(100, 750, "AI-Generated Travel Itinerary")
+
+    # Move to next line
+    c.setFont("Helvetica", 12)
+    c.drawString(100, 720, f"📍 Destination: {destination}")
+    c.drawString(100, 700, f"📅 Start Date: {start_date}")
+    c.drawString(100, 680, f"⏳ Duration: {duration} days")
+    c.drawString(100, 660, f"💰 Budget: {budget}")
+    c.drawString(100, 640, f"🎭 Preferences: {preferences}")
+
+    # Add itinerary content
+    text = c.beginText(100, 600)
+    text.setFont("Helvetica", 12)
+    
+    # Wrap text for readability
+    itinerary_lines = itinerary.split("\n")
+    for line in itinerary_lines:
+        text.textLine(line)
+
+    c.drawText(text)
+
+    # Save the PDF
+    c.save()
+    
     return filename
