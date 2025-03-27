@@ -3,7 +3,7 @@ import requests
 import json
 import time
 import os
-from google import genai
+import google.generativeai as genai
 from dotenv import load_dotenv
 from tts import text_to_speech  # Ensure this function exists in tts.py
 
