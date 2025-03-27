@@ -3,7 +3,7 @@ import time
 import os
 import google.generativeai as genai
 from dotenv import load_dotenv
-from gtts import gTTS  # Import Google Text-to-Speech
+import pyttsx3  # Offline Text-to-Speech
 
 # Load environment variables
 load_dotenv()
@@ -29,17 +29,18 @@ def generate_itinerary(destination, start_date, duration, budget, preferences):
     """
 
     try:
-        response = model.generate_content([prompt])  # FIXED usage of model
+        response = model.generate_content([prompt])  
         return response.text if response and hasattr(response, 'text') else "⚠️ Unable to generate itinerary."
     except Exception as e:
         return f"❌ API Error: {e}"
 
-def text_to_speech(text, filename="itinerary.mp3"):
-    """Convert text to speech using Google TTS."""
+def text_to_speech_offline(text, filename="itinerary.mp3"):
+    """Convert text to speech using offline pyttsx3."""
     try:
-        tts = gTTS(text=text, lang="en")
-        tts.save(filename)
-        return filename  # Return the path of the saved audio file
+        engine = pyttsx3.init()
+        engine.save_to_file(text, filename)
+        engine.runAndWait()
+        return filename  # Return saved audio file
     except Exception as e:
         st.error(f"❌ Text-to-Speech Error: {e}")
         return None
@@ -68,14 +69,12 @@ if st.button("🚀 Generate Itinerary"):
         # Convert itinerary to speech
         st.subheader("🔊 Listen to Your Itinerary")
         
-        # Debugging: Check if `itinerary` is empty
         if not itinerary.strip():
             st.warning("⚠️ Generated itinerary is empty. No audio to generate.")
         else:
-            audio_file = text_to_speech(itinerary)
+            audio_file = text_to_speech_offline(itinerary)
 
             if audio_file and os.path.exists(audio_file):
                 st.audio(audio_file, format="audio/mp3")
             else:
                 st.warning("❌ Error: Unable to generate audio.")
-
