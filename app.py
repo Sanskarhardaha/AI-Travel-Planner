@@ -16,8 +16,9 @@ if not GOOGLE_API_KEY:
     st.error("❌ Error: GOOGLE_API_KEY is missing. Please set it in a `.env` file.")
     st.stop()
 
-# Initialize Google AI client
-client = genai.Client(api_key=GOOGLE_API_KEY)
+# Initialize Google AI client (FIXED)
+genai.configure(api_key=GOOGLE_API_KEY)
+model = genai.GenerativeModel("gemini-2.0-flash")
 
 USER_HISTORY_FILE = "user_history.json"
 
@@ -30,10 +31,7 @@ def generate_itinerary(destination, start_date, duration, budget, preferences):
     """
 
     try:
-        response = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=prompt
-        )
+        response = model.generate_content([prompt])  # FIXED usage of model
         return response.text if response and hasattr(response, 'text') else "⚠️ Unable to generate itinerary."
     except Exception as e:
         return f"❌ API Error: {e}"
