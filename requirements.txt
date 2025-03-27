@@ -3,4 +3,5 @@ google-generativeai
 requests
 python-dotenv
 pyttsx3
-fpdf
+reportlab
+
