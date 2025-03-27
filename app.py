@@ -3,20 +3,18 @@ import time
 import os
 import google.generativeai as genai
 from dotenv import load_dotenv
-from tts import text_to_speech  # Ensure this function exists in tts.py
+from gtts import gTTS  # Import Google Text-to-Speech
 
-# Load environment variables from .env file
+# Load environment variables
 load_dotenv()
-
-# Retrieve API key from .env file
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-# Check if the API key is missing
+# Check API Key
 if not GOOGLE_API_KEY:
     st.error("❌ Error: GOOGLE_API_KEY is missing. Please set it in a `.env` file.")
     st.stop()
 
-# Initialize Google AI client (FIXED)
+# Configure Gemini AI
 genai.configure(api_key=GOOGLE_API_KEY)
 model = genai.GenerativeModel("gemini-2.0-flash")
 
@@ -35,6 +33,16 @@ def generate_itinerary(destination, start_date, duration, budget, preferences):
         return response.text if response and hasattr(response, 'text') else "⚠️ Unable to generate itinerary."
     except Exception as e:
         return f"❌ API Error: {e}"
+
+def text_to_speech(text, filename="itinerary.mp3"):
+    """Convert text to speech using Google TTS."""
+    try:
+        tts = gTTS(text=text, lang="en")
+        tts.save(filename)
+        return filename  # Return the path of the saved audio file
+    except Exception as e:
+        st.error(f"❌ Text-to-Speech Error: {e}")
+        return None
 
 # Streamlit UI
 st.set_page_config(page_title="AI Travel Planner", layout="wide")
@@ -59,8 +67,15 @@ if st.button("🚀 Generate Itinerary"):
 
         # Convert itinerary to speech
         st.subheader("🔊 Listen to Your Itinerary")
-        audio_file = text_to_speech(itinerary)
-        if audio_file:
-            st.audio(audio_file, format="audio/mp3")
+        
+        # Debugging: Check if `itinerary` is empty
+        if not itinerary.strip():
+            st.warning("⚠️ Generated itinerary is empty. No audio to generate.")
         else:
-            st.warning("Unable to generate audio.")
+            audio_file = text_to_speech(itinerary)
+
+            if audio_file and os.path.exists(audio_file):
+                st.audio(audio_file, format="audio/mp3")
+            else:
+                st.warning("❌ Error: Unable to generate audio.")
+
