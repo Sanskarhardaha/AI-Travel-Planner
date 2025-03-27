@@ -20,7 +20,7 @@ if not GOOGLE_API_KEY:
 genai.configure(api_key=GOOGLE_API_KEY)
 
 # Initialize the correct Gemini model
-model = genai.GenerativeModel("gemini-pro")
+model = genai.GenerativeModel("gemini-2.0-flash")
 
 USER_HISTORY_FILE = "user_history.json"
 
