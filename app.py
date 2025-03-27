@@ -1,6 +1,4 @@
 import streamlit as st
-import requests
-import json
 import time
 import os
 import google.generativeai as genai
@@ -13,14 +11,16 @@ load_dotenv()
 # Retrieve API key from .env file
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-model = genai.GenerativeModel("gemini-pro") 
 # Check if the API key is missing
 if not GOOGLE_API_KEY:
     st.error("❌ Error: GOOGLE_API_KEY is missing. Please set it in a `.env` file.")
     st.stop()
 
-# Initialize Google AI client
-google_client = genai.Client(api_key=GOOGLE_API_KEY)
+# Configure Google AI client
+genai.configure(api_key=GOOGLE_API_KEY)
+
+# Select model
+model = genai.GenerativeModel("gemini-pro")
 
 USER_HISTORY_FILE = "user_history.json"
 
@@ -31,8 +31,13 @@ def generate_itinerary(destination, start_date, duration, budget, preferences):
     The budget is {budget}, and the user prefers {preferences}. 
     Include sightseeing, activities, local food recommendations, and hidden gems.
     """
-    response = google_client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
-    return response.text
+    
+    response = model.generate_content(prompt)
+    
+    if response and hasattr(response, 'text'):
+        return response.text
+    else:
+        return "⚠️ Unable to generate itinerary. Please try again."
 
 # Streamlit UI
 st.set_page_config(page_title="AI Travel Planner", layout="wide")
@@ -44,7 +49,6 @@ st.write("Plan your trip effortlessly with AI-driven recommendations!")
 destination = st.text_input("🌆 Destination", "Paris")
 start_date = st.date_input("📅 Start Date")
 duration = st.number_input("⏳ Trip Duration (Days)", min_value=1, max_value=30, value=5)
-
 budget = st.selectbox("💰 Budget", ["Low", "Medium", "High"])
 preferences = st.text_area("🎭 Preferences", "Culture, Sightseeing, Local Food")
 
