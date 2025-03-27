@@ -11,7 +11,7 @@ from tts import text_to_speech  # Ensure this function exists in tts.py
 load_dotenv()
 
 # Retrieve API key from .env file
-genai.configure(api_key=GOOGLE_API_KEY)
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 model = genai.GenerativeModel("gemini-pro") 
 # Check if the API key is missing
