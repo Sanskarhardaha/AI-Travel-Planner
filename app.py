@@ -1,8 +1,7 @@
-
 import streamlit as st
 import time
 import os
-import google.generativeai as genai
+import google.generativeai as genai  # ✅ Correct import
 from dotenv import load_dotenv
 from tts import text_to_speech  # Ensure this function exists in tts.py
 
@@ -20,8 +19,8 @@ if not GOOGLE_API_KEY:
 # Configure Google AI client
 genai.configure(api_key=GOOGLE_API_KEY)
 
-# Select model
-model = genai.GenerativeModel("gemini")
+# Initialize the Gemini model ✅ Use a valid model
+model = genai.GenerativeModel("gemini-pro")
 
 USER_HISTORY_FILE = "user_history.json"
 
@@ -32,13 +31,12 @@ def generate_itinerary(destination, start_date, duration, budget, preferences):
     The budget is {budget}, and the user prefers {preferences}. 
     Include sightseeing, activities, local food recommendations, and hidden gems.
     """
-    
-    response = model.generate_content(prompt)
-    
-    if response and hasattr(response, 'text'):
-        return response.text
-    else:
-        return "⚠️ Unable to generate itinerary. Please try again."
+
+    try:
+        response = model.generate_content([prompt])  # ✅ Correct usage
+        return response.text if response and hasattr(response, 'text') else "⚠️ Unable to generate itinerary."
+    except Exception as e:
+        return f"❌ API Error: {e}"
 
 # Streamlit UI
 st.set_page_config(page_title="AI Travel Planner", layout="wide")
@@ -55,19 +53,4 @@ preferences = st.text_area("🎭 Preferences", "Culture, Sightseeing, Local Food
 
 # Generate itinerary button
 if st.button("🚀 Generate Itinerary"):
-    with st.spinner("Generating your personalized itinerary..."):
-        itinerary = generate_itinerary(destination, start_date, duration, budget, preferences)
-        time.sleep(2)
-        st.subheader("📜 Your Itinerary")
-        st.write(itinerary)
-
-        # Convert itinerary to speech
-        st.subheader("🔊 Listen to Your Itinerary")
-        audio_file = text_to_speech(itinerary)
-        if audio_file:
-            st.audio(audio_file, format="audio/mp3")
-        else:
-            st.warning("Unable to generate audio.")
-
-
-
+    with st.spinner("Generating your
