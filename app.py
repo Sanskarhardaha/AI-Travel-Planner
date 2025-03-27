@@ -2,8 +2,9 @@ import streamlit as st
 import time
 import os
 import google.generativeai as genai
+import pyttsx3  # Offline text-to-speech
 from dotenv import load_dotenv
-import pyttsx3  # Offline Text-to-Speech
+from pdf_generator import generate_pdf  # Import the new PDF function
 
 # Load environment variables
 load_dotenv()
@@ -34,13 +35,13 @@ def generate_itinerary(destination, start_date, duration, budget, preferences):
     except Exception as e:
         return f"❌ API Error: {e}"
 
-def text_to_speech_offline(text, filename="itinerary.mp3"):
-    """Convert text to speech using offline pyttsx3."""
+def text_to_speech(text, filename="itinerary.mp3"):
+    """Convert text to speech using pyttsx3 (offline TTS)."""
     try:
         engine = pyttsx3.init()
         engine.save_to_file(text, filename)
         engine.runAndWait()
-        return filename  # Return saved audio file
+        return filename
     except Exception as e:
         st.error(f"❌ Text-to-Speech Error: {e}")
         return None
@@ -72,9 +73,14 @@ if st.button("🚀 Generate Itinerary"):
         if not itinerary.strip():
             st.warning("⚠️ Generated itinerary is empty. No audio to generate.")
         else:
-            audio_file = text_to_speech_offline(itinerary)
+            audio_file = text_to_speech(itinerary)
 
             if audio_file and os.path.exists(audio_file):
                 st.audio(audio_file, format="audio/mp3")
             else:
                 st.warning("❌ Error: Unable to generate audio.")
+
+        # Download itinerary as PDF
+        pdf_file = generate_pdf(destination, start_date, duration, budget, preferences, itinerary)
+        with open(pdf_file, "rb") as file:
+            st.download_button(label="📥 Download Itinerary as PDF", data=file, file_name="itinerary.pdf", mime="application/pdf")
