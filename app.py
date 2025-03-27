@@ -1,7 +1,7 @@
 import streamlit as st
 import time
 import os
-import google.generativeai as genai
+from google import genai
 from dotenv import load_dotenv
 from tts import text_to_speech  # Ensure this function exists in tts.py
 
@@ -16,11 +16,8 @@ if not GOOGLE_API_KEY:
     st.error("❌ Error: GOOGLE_API_KEY is missing. Please set it in a `.env` file.")
     st.stop()
 
-# Configure Google AI client
-genai.configure(api_key=GOOGLE_API_KEY)
-
-# Initialize the correct Gemini model
-model = genai.GenerativeModel("gemini-2.0-flash")
+# Initialize Google AI client
+client = genai.Client(api_key=GOOGLE_API_KEY)
 
 USER_HISTORY_FILE = "user_history.json"
 
@@ -31,9 +28,12 @@ def generate_itinerary(destination, start_date, duration, budget, preferences):
     The budget is {budget}, and the user prefers {preferences}. 
     Include sightseeing, activities, local food recommendations, and hidden gems.
     """
-    
+
     try:
-        response = model.generate_content([prompt])  # FIXED generate_content usage
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=prompt
+        )
         return response.text if response and hasattr(response, 'text') else "⚠️ Unable to generate itinerary."
     except Exception as e:
         return f"❌ API Error: {e}"
