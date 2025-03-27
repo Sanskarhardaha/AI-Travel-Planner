@@ -1,0 +1,24 @@
+{
+    "users": [
+        {
+            "destination": "Madhya Pradesh, jabalpur",
+            "budget": "Low",
+            "preferences": "Culture, Sightseeing, Local Food"
+        },
+        {
+            "destination": "mandla,mp",
+            "budget": "Low",
+            "preferences": "Culture, Sightseeing, Local Food"
+        },
+        {
+            "destination": "Paris",
+            "budget": "Low",
+            "preferences": "Culture, Sightseeing, Local Food"
+        },
+        {
+            "destination": "Paris",
+            "budget": "Low",
+            "preferences": "Culture, Sightseeing, Local Food"
+        }
+    ]
+}
